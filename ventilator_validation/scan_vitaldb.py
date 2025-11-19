@@ -44,7 +44,13 @@ def scan_vitaldb():
     # Optimize: Filter df_trks for our valid cases first
     df_trks_valid = df_trks[df_trks['caseid'].isin(valid_case_ids)]
     
-    for caseid in valid_case_ids[:100]: # Limit to 100 for now to be fast, or remove limit for full scan
+    # Process ALL valid cases (no limit)
+    print(f"Scanning {len(valid_case_ids)} cases for metadata...")
+    
+    for idx, caseid in enumerate(valid_case_ids):
+        if (idx + 1) % 100 == 0:
+            print(f"  Progress: {idx + 1}/{len(valid_case_ids)} cases scanned...")
+            
         case_tracks = df_trks_valid[df_trks_valid['caseid'] == caseid]['tname'].values
         
         has_flow = 'Primus/FLOW_AIR' in case_tracks

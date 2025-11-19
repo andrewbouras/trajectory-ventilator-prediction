@@ -1,42 +1,35 @@
-# LaTeX auxiliary files
-*.aux
-*.log
-*.out
-*.toc
-*.bbl
-*.blg
-*.synctex.gz
-*.fdb_latexmk
-*.fls
-*.pdf
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-venv/
-env/
-ENV/
+*.egg-info/
 
-# MacOS
+# Large data files
+ventilator_validation/validation_checkpoints/predictions.csv
+ventilator_validation/validation_checkpoints/*.csv
+!ventilator_validation/validation_checkpoints/per_case_results.csv
+ventilator_validation/valid_vitaldb_cases.csv
+
+# Temporary documentation
+ventilator_validation/DATA_FLOW_EXPLAINED.md
+ventilator_validation/COLAB_VS_LOCAL.md
+ventilator_validation/READY_TO_RUN.md
+
+# Old versions
+figure*_roc_curves.png
+figure*_roc_curves.pdf
+figure*_calibration.png
+figure*_calibration.pdf
+figure*_precision_recall.png
+figure*_precision_recall.pdf
+!figure*_updated.png
+!figure*_updated.pdf
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# IDE
-.vscode/
-.idea/
-.history/
-*.swp
-*.swo
-*~
-
-# Data files (if large)
-*.csv.gz
-*.parquet
-
-# Compiled models (optional - remove if you want to share the trained models)
-# *.pkl
-

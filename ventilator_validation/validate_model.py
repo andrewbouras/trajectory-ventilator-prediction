@@ -52,9 +52,10 @@ def run_validation():
     all_predictions = []
     all_labels = []
     all_escalations = []
+    case_summary = []  # Track per-case results
     
-    # Process first 10 cases for testing
-    test_cases = df_cases.head(10)
+    # Process first 50 cases (expanded from 10)
+    test_cases = df_cases.head(50)
     
     print(f"\n🔄 Processing {len(test_cases)} VitalDB cases...")
     
@@ -86,6 +87,14 @@ def run_validation():
         all_predictions.extend(y_pred)
         all_labels.extend(y_true)
         all_escalations.extend(escalations)
+        
+        # Track per-case summary
+        case_summary.append({
+            'caseid': caseid,
+            'n_breaths': len(breath_df),
+            'escalation_rate': y_true.mean(),
+            'mean_pred_risk': y_pred.mean()
+        })
         
         print(f"  📊 Escalation rate: {y_true.mean():.1%}")
         print(f"  📊 Mean predicted risk: {y_pred.mean():.3f}")
@@ -136,11 +145,16 @@ def run_validation():
     
     # Save results
     results_df = pd.DataFrame({
-        'metric': ['AUROC', 'AUPRC', 'Sensitivity', 'Specificity', 'PPV', 'NPV', 'Total_Breaths', 'Escalation_Rate'],
-        'value': [auroc, auprc, sensitivity, specificity, ppv, npv, len(all_labels), all_labels.mean()]
+        'metric': ['AUROC', 'AUPRC', 'Sensitivity', 'Specificity', 'PPV', 'NPV', 'Total_Breaths', 'Escalation_Rate', 'N_Cases'],
+        'value': [auroc, auprc, sensitivity, specificity, ppv, npv, len(all_labels), all_labels.mean(), len(case_summary)]
     })
     results_df.to_csv(RESULTS_FILE, index=False)
     print(f"\n💾 Results saved to: {RESULTS_FILE}")
+    
+    # Save per-case summary
+    case_df = pd.DataFrame(case_summary)
+    case_df.to_csv('validation_results_per_case.csv', index=False)
+    print(f"💾 Per-case results saved to: validation_results_per_case.csv")
     
     print("\n" + "="*80)
     print("✅ VALIDATION COMPLETE!")
