@@ -81,7 +81,7 @@ For VitalDB external validation, the trained trajectory model (trajectory_model.
 
 The primary analysis compared area under the receiver operating characteristic curve (AUROC) between baseline and trajectory models using bootstrap resampling (1,000 iterations) to generate 95% confidence intervals. Secondary metrics included area under precision-recall curve (AUPRC), Brier score, calibration curves, and calibration slopes. Clinical performance metrics at optimal thresholds (Youden's J statistic) included sensitivity, specificity, positive predictive value (PPV), negative predictive value (NPV), F1 score, and number needed to screen (NNS). Feature importance was quantified using XGBoost built-in metrics (information gain). Subgroup analyses stratified by lung compliance and resistance assessed generalizability.
 
-All analyses used Python 3.11 with scikit-learn 1.3, XGBoost 2.0, pandas 2.1, and NumPy 1.24.
+All analyses used Python 3.11 with scikit-learn 1.3, XGBoost 2.0, pandas 2.1, and NumPy 1.24. Complete code for model training, validation pipeline, and figure generation is publicly available at https://github.com/andrewbouras/trajectory-ventilator-prediction.
 
 
 ## Results
@@ -171,6 +171,10 @@ Several limitations warrant consideration. First, while we performed large-scale
 ### Future Directions
 
 This work opens multiple research directions: external validation in real ICU datasets (MIMIC-IV, eICU); linking predicted escalations to true VILI endpoints (pneumothorax, radiographic injury, mortality); randomized trial comparing trajectory-based alerts versus standard care; incorporating additional features (respiratory rate variability, volume-pressure loops, patient-ventilator synchrony); deep learning approaches (LSTM, transformers); real-time deployment with user-centered interface design; and personalization using online learning.
+
+### Data and Code Availability
+
+The training dataset (Kaggle Ventilator Pressure Prediction) is publicly available at https://www.kaggle.com/c/ventilator-pressure-prediction. The VitalDB external validation database is publicly available at https://vitaldb.net. All code for model development, validation pipeline, and analyses is openly available at https://github.com/andrewbouras/trajectory-ventilator-prediction, enabling full reproducibility and extension of this work.
 
 ### Conclusions
 
