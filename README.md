@@ -1,148 +1,224 @@
 # Trajectory-Based Machine Learning for Early Prediction of Dangerous Ventilator Pressure Escalation
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-## Overview
+**A prospective validation study demonstrating that trajectory-based waveform analysis enables highly accurate prediction of ventilator pressure escalation with a 5-breath early warning window.**
 
-This repository contains the manuscript and validation code for a novel trajectory-based machine learning approach for prospective prediction of dangerous ventilator pressure escalation in mechanically ventilated patients. The model achieves:
+📄 **Manuscript:** *Trajectory-Based Machine Learning For Early Prediction Of Dangerous Ventilator Pressure Escalation: A Prospective Validation Study*  
+👤 **Authors:** Andrew Bouras (Nova Southeastern University), Luis Rodriguez (Johns Hopkins School of Medicine)
 
-- **Internal validation (Kaggle dataset):** AUROC 0.981, PPV 99.7%
-- **External validation (VitalDB real ICU patients):** AUROC 0.947, PPV 96.4%
+---
 
-## Abstract
+## 🎯 Key Findings
 
-Ventilator-induced lung injury (VILI) from excessive airway pressures remains a leading cause of morbidity in mechanically ventilated patients. This study demonstrates that machine learning incorporating temporal pressure dynamics (slope, acceleration, momentum) enables near-perfect prospective prediction of dangerous pressure escalation with a 5-breath early warning window. External validation on real ICU patients confirms the model generalizes beyond simulated data, enabling proactive rather than reactive ventilator management.
+- **AUROC 0.981** on internal test set (75,444 breaths)
+- **AUROC 0.936** on external validation (500 ICU patients, 1,271,983 breaths)
+- **4.9 breath mean lead time** - validated prospective early warning
+- **98.8% specificity** - minimal false alarms
+- **Trajectory features** (slope, acceleration, momentum) provide 60% of predictive power
 
-## Repository Structure
+---
 
-```
-.
-├── ajrccm.tex                    # Main manuscript (LaTeX)
-├── ventilator_validation/        # Validation pipeline code
-│   ├── models/                   # Trained model files
-│   │   ├── trajectory_model.pkl  # XGBoost model
-│   │   └── scaler_trajectory.pkl # Feature scaler
-│   ├── breath_parser.py          # Breath segmentation utilities
-│   ├── data_loader.py            # Data loading and preprocessing
-│   ├── validate_model.py         # VitalDB validation script
-│   ├── test_pipeline.py          # Pipeline testing
-│   ├── scan_vitaldb.py           # VitalDB case scanner
-│   ├── validation_results.csv    # VitalDB validation results
-│   └── setup_env.sh              # Environment setup script
-└── README.md                     # This file
-```
+## 📊 What This Repository Contains
 
-## Manuscript
+### Core Code
+- **`ventilator_validation/`** - Complete validation pipeline
+  - `validate_with_checkpoints.py` - Robust validation with automatic resume
+  - `scan_vitaldb.py` - VitalDB case scanning
+  - `data_loader.py` - Breath-level feature extraction
+  - `models/` - Trained XGBoost model and scaler
 
-The manuscript (`ajrccm.tex`) is formatted for submission to the **American Journal of Respiratory and Critical Care Medicine (AJRCCM)**. It includes:
+### Manuscript
+- **`manu_revised.md`** - Full manuscript (Markdown format)
+- **`figure*_updated.*`** - All figures (PNG & PDF)
+- **`TABLES_AND_FIGURES_README.md`** - Figure descriptions
 
-- Complete methods section with VitalDB external validation
-- Results from both internal (Kaggle) and external (VitalDB) validation
-- Feature importance analysis
-- Discussion of clinical implications and deployment feasibility
+### Analysis Scripts
+- `regenerate_figures.py` - Reproduce all figures
+- `create_clinical_analyses.py` - Subgroup analyses
+- `verify_authenticity.py` - Data integrity verification
 
-### Compiling the Manuscript
+---
 
+## 🚀 Quick Start
+
+### 1. Install Dependencies
 ```bash
-pdflatex ajrccm.tex
-pdflatex ajrccm.tex  # Run twice for references
+pip install -r requirements.txt
 ```
 
-## Validation Pipeline
-
-### Requirements
-
-- Python 3.11+
-- XGBoost 2.0+
-- scikit-learn 1.3+
-- pandas 2.1+
-- NumPy 1.24+
-
-### Installation
-
+### 2. Run 100-Case Validation
 ```bash
 cd ventilator_validation
-bash setup_env.sh
-```
-
-Or manually:
-
-```bash
-pip install xgboost scikit-learn pandas numpy scipy matplotlib
-```
-
-### Running Validation
-
-```bash
-cd ventilator_validation
-python validate_model.py
+python3 validate_with_checkpoints.py 100
 ```
 
 This will:
-1. Load the trained trajectory model
-2. Process VitalDB waveform data
-3. Extract 33 breath-level features (11 baseline + 22 trajectory)
-4. Generate predictions and performance metrics
-5. Output validation results
+- Download waveforms from VitalDB API
+- Extract breath-level features
+- Run predictions with the frozen model
+- Save checkpoints at 10, 25, 50, 75, 100 cases
+- Generate performance reports
 
-## Key Features
+**Output:** Results saved in `validation_checkpoints/`
 
-The model uses 33 engineered features:
+---
 
-**Baseline (11):** Respiratory mechanics, current pressure characteristics, flow characteristics
+## 📖 Methodology
 
-**Trajectory (22):** Historical pressure values, slope features, acceleration, volatility, trend, momentum, range dynamics
+### Training Data
+- **Source:** Kaggle/Google Brain Ventilator Pressure Prediction Dataset
+- **Size:** 75,444 breaths (simulated test-lung data)
+- **Split:** 70% training, 30% temporal hold-out test
 
-**Top 5 Most Important Features:**
-1. Current peak inspiratory pressure (28.1%)
-2. Pressure slope over 3 breaths (20.0%)
-3. Consecutive rising breaths (18.7%)
-4. Pressure trend over 3 breaths (17.2%)
-5. Pressure acceleration (4.9%)
+### External Validation
+- **Source:** VitalDB Database (Seoul National University Hospital)
+- **Size:** 500 cases, 1,271,983 breaths
+- **Type:** Real ICU patient data
 
-## Clinical Implications
+### Model
+- **Algorithm:** XGBoost gradient boosting
+- **Features:** 34 total (11 static + 23 trajectory)
+- **Outcome:** PIP escalation >3 cmH₂O over next 5 breaths
 
-- **5-breath early warning window** (~10-15 seconds lead time)
-- **Minimal false alarms** (PPV 96.4% on real patients)
-- **Real-time performance** (<100ms per breath prediction)
-- **Actionable insights** for lung-protective ventilation strategies
+### Top Trajectory Features
+1. Pressure slope (3 breaths) - 20.0%
+2. Consecutive rising breaths - 18.7%
+3. Pressure trend (3 breaths) - 17.2%
+4. Current PIP - 28.1%
+5. Pressure acceleration - 4.9%
 
-## Citation
+---
 
-If you use this work, please cite:
+## 📈 Results Summary
+
+### Internal Test Set
+| Metric | Baseline | Trajectory |
+|--------|----------|------------|
+| AUROC | 0.904 | **0.981** |
+| Sensitivity | 86.2% | 92.4% |
+| Specificity | 81.2% | 99.3% |
+| PPV | 90.8% | 99.7% |
+
+### External Validation (500 VitalDB Cases)
+| Metric | Value |
+|--------|-------|
+| AUROC | 0.936 |
+| Sensitivity | 86.5% |
+| Specificity | 98.8% |
+| PPV | 77.5% |
+| NPV | 99.3% |
+
+### Subgroup Analysis
+- **Small escalations (3-10 cmH₂O):** Mean confidence 0.917
+- **Large escalations (>10 cmH₂O):** Mean confidence 0.980
+
+---
+
+## 🔬 Reproducibility
+
+### Regenerate All Figures
+```bash
+python3 ventilator_validation/regenerate_figures.py
+```
+
+### Run Clinical Analyses
+```bash
+python3 ventilator_validation/create_clinical_analyses.py
+```
+
+### Verify Data Authenticity
+```bash
+python3 ventilator_validation/verify_authenticity.py
+```
+
+---
+
+## 📁 Repository Structure
+
+```
+.
+├── manu_revised.md                      # Main manuscript
+├── figure*_updated.{png,pdf}            # Updated figures (500 cases)
+├── TABLES_AND_FIGURES_README.md         # Figure descriptions
+├── requirements.txt                     # Python dependencies
+├── ventilator_validation/
+│   ├── validate_with_checkpoints.py     # Main validation script
+│   ├── scan_vitaldb.py                  # Scan VitalDB cases
+│   ├── data_loader.py                   # Feature extraction
+│   ├── models/
+│   │   ├── trajectory_model.pkl         # Trained XGBoost model
+│   │   └── scaler_trajectory.pkl        # Feature scaler
+│   ├── validation_checkpoints/          # Results & checkpoints
+│   │   ├── checkpoint_*.json            # Performance at milestones
+│   │   ├── per_case_results.csv         # Per-case summary
+│   │   └── progress.json                # Resume state
+│   └── README_VALIDATION.md             # Validation guide
+└── README.md                            # This file
+```
+
+---
+
+## 💡 Clinical Implications
+
+### What This Enables
+- **Proactive vs. Reactive:** Shift from threshold alarms to trajectory-based early warning
+- **Actionable Lead Time:** 10-15 seconds for immediate bedside interventions
+- **Low False Alarms:** 98.8% specificity reduces alarm fatigue
+- **Automated Integration:** Compatible with closed-loop ventilator systems
+
+### Use Cases
+- Real-time bedside monitoring
+- Smart ventilator pressure-relief protocols
+- Early detection of patient-ventilator dyssynchrony
+- Closed-loop automated adjustments
+
+---
+
+## 📚 Citation
+
+If you use this code or build upon this work, please cite:
 
 ```bibtex
 @article{bouras2025trajectory,
   title={Trajectory-Based Machine Learning For Early Prediction Of Dangerous Ventilator Pressure Escalation: A Prospective Validation Study},
-  author={Bouras, Andrew},
-  journal={American Journal of Respiratory and Critical Care Medicine},
-  year={2025},
-  note={In preparation}
+  author={Bouras, Andrew and Rodriguez, Luis},
+  journal={[Under Review]},
+  year={2025}
 }
 ```
 
-## Data Sources
+---
 
-- **Training data:** Ventilator Pressure Prediction dataset (Kaggle/Google Brain, 2021)
-- **External validation:** VitalDB database (Seoul National University Hospital)
+## 📜 License
 
-## Author
-
-**Andrew Bouras, OMS-II Research Fellow**  
-Nova Southeastern University Kiran C. Patel College of Osteopathic Medicine  
-📧 ab4646@mynsu.nova.edu
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Acknowledgments
-
-- VitalDB team for providing open-access ICU waveform data
-- Google Brain for the Kaggle ventilator dataset
-- Nova Southeastern University for research support
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-*For questions, issues, or collaboration inquiries, please open an issue or contact the author directly.*
+## 🤝 Contributing
 
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📧 Contact
+
+**Andrew Bouras**  
+Nova Southeastern University Kiran C. Patel College of Osteopathic Medicine  
+Email: ab4646@mynsu.nova.edu
+
+---
+
+## 🙏 Acknowledgments
+
+- **VitalDB** for providing open access to ICU waveform data
+- **Google Brain/Kaggle** for the ventilator pressure prediction dataset
+- **Open-source community** for XGBoost, scikit-learn, and related tools
+
+---
+
+## ⚠️ Disclaimer
+
+This is a research tool and has not been validated for clinical use. It is provided for academic and research purposes only.
